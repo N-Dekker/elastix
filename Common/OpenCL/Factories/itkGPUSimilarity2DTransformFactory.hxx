@@ -26,9 +26,7 @@ template< typename NDimensions >
 void
 GPUSimilarity2DTransformFactory2< NDimensions >::RegisterOneFactory()
 {
-  typedef GPUSimilarity2DTransformFactory2< NDimensions > GPUTransformFactoryType;
-  typename GPUTransformFactoryType::Pointer factory = GPUTransformFactoryType::New();
-  ObjectFactoryBase::RegisterFactory( factory );
+  ObjectFactoryBase::RegisterFactory(New());
 }
 
 

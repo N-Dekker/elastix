@@ -27,9 +27,7 @@ void
 GPUShrinkImageFilterFactory2< TTypeListIn, TTypeListOut, NDimensions >
 ::RegisterOneFactory()
 {
-  typedef GPUShrinkImageFilterFactory2< TTypeListIn, TTypeListOut, NDimensions > GPUFilterFactoryType;
-  typename GPUFilterFactoryType::Pointer factory = GPUFilterFactoryType::New();
-  ObjectFactoryBase::RegisterFactory( factory );
+  ObjectFactoryBase::RegisterFactory(New());
 }
 
 

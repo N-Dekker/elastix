@@ -27,9 +27,7 @@ void
 GPUImageFactory2< TTypeList, NDimensions >
 ::RegisterOneFactory()
 {
-  typedef GPUImageFactory2< TTypeList, NDimensions > GPUImageFactoryType;
-  typename GPUImageFactoryType::Pointer factory = GPUImageFactoryType::New();
-  ObjectFactoryBase::RegisterFactory( factory );
+  ObjectFactoryBase::RegisterFactory(New());
 }
 
 

@@ -27,9 +27,7 @@ void
 GPUBSplineInterpolateImageFunctionFactory2< TTypeList, NDimensions >
 ::RegisterOneFactory()
 {
-  typedef GPUBSplineInterpolateImageFunctionFactory2< TTypeList, NDimensions > GPUInterpolateFactoryType;
-  typename GPUInterpolateFactoryType::Pointer factory = GPUInterpolateFactoryType::New();
-  ObjectFactoryBase::RegisterFactory( factory );
+  ObjectFactoryBase::RegisterFactory(New());
 }
 
 
