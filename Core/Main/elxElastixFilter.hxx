@@ -207,7 +207,7 @@ ElastixFilter< TFixedImage, TMovingImage >
   // Run the (possibly multiple) registration(s)
   for( unsigned int i = 0; i < parameterMapVector.size(); ++i )
   {
-    // Set image dimension from input images, override user settings
+    // Set image dimension from input images (overrides user settings)
     parameterMapVector[ i ][ "FixedImageDimension" ]
       = ParameterValueVectorType( 1, ParameterObject::ToString( fixedImageDimension ) ) ;
     parameterMapVector[ i ][ "MovingImageDimension" ]
@@ -215,6 +215,11 @@ ElastixFilter< TFixedImage, TMovingImage >
     parameterMapVector[ i ][ "ResultImagePixelType" ]
       = ParameterValueVectorType( 1, ParameterObject::ToString( PixelType< typename TFixedImage::PixelType >::ToString() ) );
 
+    // Initial transform parameter files are handled via arguments and enclosing loop, not InitialTransformParametersFileName
+    if( parameterMapVector[ i ].find( "InitialTransformParametersFileName" ) != parameterMapVector[ i ].end() )
+    {
+      parameterMapVector[ i ][ "InitialTransformParametersFileName" ] = ParameterValueVectorType( 1, "NoInitialTransform" );
+    }
 
     // Create new instance of ElastixMain
     ElastixMainPointer elastix = ElastixMainType::New();
@@ -258,18 +263,15 @@ ElastixFilter< TFixedImage, TMovingImage >
     fixedImageOriginalDirection = elastix->GetOriginalFixedImageDirectionFlat();
 
     transformParameterMapVector.push_back( elastix->GetTransformParametersMap() );
-
-    // TODO: Fix elastix corrupting default pixel value
-    transformParameterMapVector[ transformParameterMapVector.size() - 1 ][ "DefaultPixelValue" ]
-      = parameterMapVector[ i ][ "DefaultPixelValue" ];
-
-    // Set initial transform to an index number instead of a parameter filename
     if( i > 0 )
     {
-      std::stringstream index;
-      index << ( i - 1 ); // MS: Can this be done in the constructor of stringstream?
-      transformParameterMapVector[ i ][ "InitialTransformParametersFileName" ][ 0 ] = index.str();
+      transformParameterMapVector[ i ][ "InitialTransformParametersFileName" ]
+        = ParameterValueVectorType( 1, ParameterObject::ToString( i - 1 ) );
     }
+
+    // TODO: Fix elastix corrupting default pixel value parameter
+    transformParameterMapVector[ transformParameterMapVector.size() - 1 ][ "DefaultPixelValue" ]
+      = parameterMapVector[ i ][ "DefaultPixelValue" ];
   } // End loop over registrations
 
   // Save result image
@@ -421,7 +423,7 @@ typename ElastixFilter< TFixedImage, TMovingImage >::FixedImageConstPointer
 ElastixFilter< TFixedImage, TMovingImage >
 ::GetFixedImage( const unsigned int index ) const
 {
-  unsigned int  n          = 0;
+  unsigned int n = 0;
   NameArrayType inputNames = this->GetInputNames();
   for( unsigned int i = 0; i < inputNames.size(); ++i )
   {

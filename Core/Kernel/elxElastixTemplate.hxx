@@ -178,6 +178,39 @@ ElastixTemplate< TFixedImage, TMovingImage >
 
 
 /**
+* ********************** GetResultDeformationField *************************
+*/
+
+template< class TFixedImage, class TMovingImage >
+typename ElastixTemplate< TFixedImage, TMovingImage >::ResultDeformationFieldType
+* ElastixTemplate< TFixedImage, TMovingImage >
+::GetResultDeformationField( unsigned int idx ) const
+{
+  if (idx < this->GetNumberOfResultDeformationFields() )
+  {
+    return dynamic_cast< ResultDeformationFieldType * >(
+      this->GetResultDeformationFieldContainer()->ElementAt( idx ).GetPointer() );
+  }
+
+  return 0;
+
+} // end GetResultDeformationField()
+
+/**
+* ********************** SetResultDeformationField *************************
+*/
+
+template< class TFixedImage, class TMovingImage >
+int
+ElastixTemplate< TFixedImage, TMovingImage >
+::SetResultDeformationField( DataObjectPointer result_deformationfield )
+{
+  this->SetResultDeformationFieldContainer(
+    MultipleDataObjectFiller::GenerateImageContainer( result_deformationfield ) );
+  return 0;
+} // end SetResultDeformationField()
+
+/**
  * **************************** Run *****************************
  */
 
@@ -283,6 +316,12 @@ ElastixTemplate< TFixedImage, TMovingImage >
     std::string err_str = excp.GetDescription();
     err_str += "\n\nError occurred during actual registration.";
     excp.SetDescription( err_str );
+
+    /** Clean up before returning - very important for exception safety of the xout global static object */
+    if( xoutlibrary::xout_valid() )
+    {
+      xoutlibrary::xout.RemoveTargetCell("iteration");
+    }
 
     /** Pass the exception to a higher level. */
     throw excp;

@@ -22,6 +22,7 @@ def main():
   parser.add_option( "-f", "--fixedlandmarks", dest="flm", help="fixed image landmarks" );
   parser.add_option( "-b", "--baselinetp", dest="btp", help="baseline transform parameter file" );
   parser.add_option( "-t", "--threshold", dest="threshold", help="threshold on landmark error" );
+  parser.add_option( "-p", "--path", dest="path", help="path where executables can be found" );
 
   (options, args) = parser.parse_args();
 
@@ -44,21 +45,13 @@ def main():
     print( "ERROR: the file " + tpFileName + " does not exist" );
     return 1;
 
-  # Below we use external programs. We have to make sure that python is able to find them.
-  # Under Windows we call this script using the Task Scheduler, which honours the system path.
-  # So, as long as transformix, etc is in the path all is fine.
-  # Under Linux we call this script using crontab, which only has a minimal environment, i.e.
-  # transformix is not in the path and can therefore not be found.
-  # To make sure it is found we add paths. To make sure this script also works for other machines,
-  # add the correct paths manually. Non-existing paths are automatically ignored.
-  #
-  # Make sure the first path is the elastix binary directory from this build
-  _path = os.path.join( options.directory, "..", "..", "bin" ); # bin dir on Linux
-  _path += os.pathsep + os.path.join( options.directory, "..", "..", "bin", "Release" ); # bin dir on Windows
+  # Below we use programs that are compiled with elastix, and are thus available
+  # in the binary directory. The user of this script has to supply the path
+  # to the binary directory via the command line.
+  # In order to make sure that python is able to find these programs we add
+  # the paths to the local environment.
+  _path = os.path.dirname( options.path );
   _path += os.pathsep + os.getenv('PATH');
-  _path += os.pathsep + "/home/marius/install/bin";     # goliath
-  _path += os.pathsep + "/elastix-nightly/install/bin"; # MacMini
-  #_path += os.pathsep + "your_path"; # Add your own path here
   os.environ['PATH'] = _path;
 
   # output file of the transformix runs; and copies, for later debugging.
@@ -85,7 +78,7 @@ def main():
   for line in f1 :
     f2.write( line.strip().split(';')[4].strip().strip( "OutputPoint = [ " ).rstrip( " ]" ) + "\n" );
   f1.close(); f2.close();
-  os.rename( landmarkstemp, landmarks1full ); # for later inspection
+  shutil.move( landmarkstemp, landmarks1full ); # for later inspection
 
   #
   # Transform the fixed image landmarks by the baseline result
@@ -102,7 +95,7 @@ def main():
   for line in f1 :
     f2.write( line.strip().split(';')[4].strip().strip( "OutputPoint = [ " ).rstrip( " ]" ) + "\n" );
   f1.close(); f2.close();
-  os.rename( landmarkstemp, landmarks2full ); # for later inspection
+  shutil.move( landmarkstemp, landmarks2full ); # for later inspection
 
   # Compute the distance between all transformed landmarks
   f1 = open( landmarks1, 'r' ); f2 = open( landmarks2, 'r' );
